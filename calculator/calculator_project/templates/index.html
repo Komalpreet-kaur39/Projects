@@ -1,0 +1,589 @@
+{% comment %} <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Remote Calculator</title>
+    <script>
+        function sendCalculation() {
+            let expression = document.getElementById("expression").value;
+            fetch("", {
+                method: "POST",
+                headers: { "Content-Type": "application/x-www-form-urlencoded" },
+                body: "expression=" + encodeURIComponent(expression)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    alert("Error: " + data.error);
+                } else {
+                    document.getElementById("result").innerText = data.result;
+                    location.reload();
+                }
+            });
+        }
+    </script>
+</head>
+<body>
+    <h2>Remote Calculator</h2>
+    <input type="text" id="expression" placeholder="Enter calculation">
+    <button onclick="sendCalculation()">Calculate</button>
+    <p>Result: <span id="result"></span></p>
+    <h3>History</h3>
+    <ul>
+        {% for calc in calculations %}
+            <li>{{ calc.expression }} = {{ calc.result }}</li>
+        {% endfor %}
+    </ul>
+</body>
+</html> {% endcomment %}
+
+
+{% comment %} <!-- calculator/templates/calculator/index.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple Calculator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin-top: 50px;
+        }
+        input {
+            width: 200px;
+            height: 30px;
+            text-align: right;
+            font-size: 20px;
+        }
+        .buttons {
+            margin-top: 10px;
+        }
+        button {
+            width: 50px;
+            height: 50px;
+            font-size: 20px;
+            margin: 5px;
+        }
+    </style>
+    <script>
+        function appendValue(value) {
+            document.getElementById("expression").value += value;
+        }
+        
+        function clearInput() {
+            document.getElementById("expression").value = "";
+        }
+
+        function calculate() {
+            let expression = document.getElementById("expression").value;
+            fetch("/", {
+                method: "POST",
+                headers: { "Content-Type": "application/x-www-form-urlencoded" },
+                body: "expression=" + encodeURIComponent(expression),
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    alert(data.error);
+                } else {
+                    document.getElementById("expression").value = data.result;
+                }
+            })
+            .catch(error => console.error("Error:", error));
+        }
+    </script>
+</head>
+<body>
+    <h2>Simple Calculator</h2>
+    <input type="text" id="expression" readonly>
+    <br>
+    <div class="buttons">
+        <button onclick="appendValue('1')">1</button>
+        <button onclick="appendValue('2')">2</button>
+        <button onclick="appendValue('3')">3</button>
+        <button onclick="appendValue('+')">+</button>
+        <br>
+        <button onclick="appendValue('4')">4</button>
+        <button onclick="appendValue('5')">5</button>
+        <button onclick="appendValue('6')">6</button>
+        <button onclick="appendValue('-')">-</button>
+        <br>
+        <button onclick="appendValue('7')">7</button>
+        <button onclick="appendValue('8')">8</button>
+        <button onclick="appendValue('9')">9</button>
+        <button onclick="appendValue('*')">*</button>
+        <br>
+        <button onclick="clearInput()">C</button>
+        <button onclick="appendValue('0')">0</button>
+        <button onclick="calculate()">=</button>
+        <button onclick="appendValue('/')">/</button>
+    </div>
+</body>
+</html> {% endcomment %}
+
+
+<!-- calculator/templates/calculator/index.html -->
+{% comment %} <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Django Calculator</title>
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; margin-top: 50px; }
+        input { width: 200px; height: 30px; text-align: right; font-size: 20px; }
+        .buttons { margin-top: 10px; }
+        button { width: 50px; height: 50px; font-size: 20px; margin: 5px; }
+        .history { margin-top: 20px; text-align: left; display: inline-block; }
+    </style>
+    <script>
+        function appendValue(value) {
+            document.getElementById("expression").value += value;
+        }
+        
+        function clearInput() {
+            document.getElementById("expression").value = "";
+        }
+    
+        function calculate() {
+            let expression = document.getElementById("expression").value;
+            fetch("/", {
+                method: "POST",
+                headers: { "Content-Type": "application/x-www-form-urlencoded" },
+                body: "expression=" + encodeURIComponent(expression),
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    alert(data.error);
+                } else {
+                    document.getElementById("expression").value = data.result;  // ✅ Show result in input
+                    updateHistory(expression, data.result);
+                }
+            })
+            .catch(error => console.error("Error:", error));
+        }
+    
+        function updateHistory(expression, result) {
+            let historyDiv = document.getElementById("history");
+            let newEntry = document.createElement("p");
+            newEntry.textContent = `${expression} = ${result}`;
+            historyDiv.prepend(newEntry);
+        }
+    </script>
+    
+</head>
+<body>
+    <h2>Django Calculator</h2>
+    <input type="text" id="expression" readonly>
+    <br>
+    <div class="buttons">
+        <button onclick="appendValue('1')">1</button>
+        <button onclick="appendValue('2')">2</button>
+        <button onclick="appendValue('3')">3</button>
+        <button onclick="appendValue('+')">+</button>
+        <br>
+        <button onclick="appendValue('4')">4</button>
+        <button onclick="appendValue('5')">5</button>
+        <button onclick="appendValue('6')">6</button>
+        <button onclick="appendValue('-')">-</button>
+        <br>
+        <button onclick="appendValue('7')">7</button>
+        <button onclick="appendValue('8')">8</button>
+        <button onclick="appendValue('9')">9</button>
+        <button onclick="appendValue('*')">*</button>
+        <br>
+        <button onclick="clearInput()">C</button>
+        <button onclick="appendValue('0')">0</button>
+        <button onclick="calculate()">=</button>
+        <button onclick="appendValue('/')">/</button>
+    </div>
+
+    <div class="history">
+        <h3>Calculation History</h3>
+        <div id="history">
+            {% for calc in history %}
+                <p>{{ calc.expression }} = {{ calc.result }}</p>
+            {% endfor %}
+        </div>
+    </div>
+</body>
+</html> {% endcomment %}
+
+{% comment %} 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculator</title>
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; }
+        input { width: 100%; height: 40px; font-size: 20px; text-align: right; }
+        button { width: 22%; height: 50px; font-size: 18px; margin: 5px; }
+        .history { text-align: left; margin-top: 20px; padding: 10px; border-top: 2px solid #ccc; }
+    </style>
+</head>
+<body>
+    <h2>Simple Calculator</h2>
+    <input type="text" id="expression" readonly>
+    <br>
+    
+    <button onclick="appendValue('1')">1</button>
+    <button onclick="appendValue('2')">2</button>
+    <button onclick="appendValue('3')">3</button>
+    <button onclick="appendValue('+')">+</button>
+    <br>
+    <button onclick="appendValue('4')">4</button>
+    <button onclick="appendValue('5')">5</button>
+    <button onclick="appendValue('6')">6</button>
+    <button onclick="appendValue('-')">-</button>
+    <br>
+    <button onclick="appendValue('7')">7</button>
+    <button onclick="appendValue('8')">8</button>
+    <button onclick="appendValue('9')">9</button>
+    <button onclick="appendValue('*')">*</button>
+    <br>
+    <button onclick="appendValue('0')">0</button>
+    <button onclick="clearInput()">C</button>
+    <button onclick="calculate()">=</button>
+    <button onclick="appendValue('/')">/</button>
+
+    <div class="history">
+        <h3>Calculation History</h3>
+        <div id="history">
+            {% for calc in history %}
+                <p>{{ calc.expression }} = {{ calc.result }}</p>
+            {% endfor %}
+        </div>
+    </div>
+
+    <script>
+        function appendValue(value) {
+            document.getElementById("expression").value += value;
+        }
+
+        function clearInput() {
+            document.getElementById("expression").value = "";
+        }
+
+        function calculate() {
+            let expression = document.getElementById("expression").value;
+
+            if (!expression) {
+                alert("Enter an expression first!");
+                return;
+            }
+
+            fetch("/", {
+                method: "POST",
+                headers: { "Content-Type": "application/x-www-form-urlencoded" },
+                body: "expression=" + encodeURIComponent(expression),
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    alert(data.error);
+                } else {
+                    document.getElementById("expression").value = data.result;
+                    updateHistory(expression, data.result);
+                }
+            })
+            .catch(error => console.error("Error:", error));
+        }
+
+        function updateHistory(expression, result) {
+            let historyDiv = document.getElementById("history");
+            let newEntry = document.createElement("p");
+            newEntry.textContent = `${expression} = ${result}`;
+            historyDiv.prepend(newEntry);
+        }
+    </script>
+</body>
+</html> {% endcomment %}
+
+{% comment %} <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculator</title>
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            text-align: center; 
+            background-color: #f4f4f4;
+        }
+        .calculator {
+            width: 300px;
+            margin: 50px auto;
+            padding: 20px;
+            background: white;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+        }
+        input { 
+            width: 90%;
+            height: 50px; 
+            font-size: 20px; 
+            text-align: right;
+            margin-bottom: 10px;
+            padding: 5px;
+            border: 2px solid #ccc;
+            border-radius: 5px;
+        }
+        .buttons {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+        }
+        button {
+            height: 50px;
+            font-size: 18px;
+            background: #3498db;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background: #2980b9;
+        }
+        .history {
+            text-align: left;
+            margin-top: 20px;
+            padding: 10px;
+            border-top: 2px solid #ccc;
+        }
+    </style>
+</head>
+<body>
+    <div class="calculator">
+        <h2>Simple Calculator</h2>
+        <input type="text" id="expression">
+        <div class="buttons">
+            <button onclick="appendValue('1')">1</button>
+            <button onclick="appendValue('2')">2</button>
+            <button onclick="appendValue('3')">3</button>
+            <button onclick="appendValue('+')">+</button>
+
+            <button onclick="appendValue('4')">4</button>
+            <button onclick="appendValue('5')">5</button>
+            <button onclick="appendValue('6')">6</button>
+            <button onclick="appendValue('-')">-</button>
+
+            <button onclick="appendValue('7')">7</button>
+            <button onclick="appendValue('8')">8</button>
+            <button onclick="appendValue('9')">9</button>
+            <button onclick="appendValue('*')">*</button>
+
+            <button onclick="appendValue('0')">0</button>
+            <button onclick="clearInput()">C</button>
+            <button onclick="calculate()">=</button>
+            <button onclick="appendValue('/')">/</button>
+        </div>
+
+        <div class="history">
+            <h3>Calculation History</h3>
+            <div id="history">
+                {% for calc in history %}
+                    <p>{{ calc.expression }} = {{ calc.result }}</p>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function appendValue(value) {
+            document.getElementById("expression").value += value;
+        }
+
+        function clearInput() {
+            document.getElementById("expression").value = "";
+        }
+
+        function calculate() {
+            let expression = document.getElementById("expression").value;
+
+            if (!expression) {
+                alert("Enter an expression first!");
+                return;
+            }
+
+            fetch("/", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ expression: expression }),
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    alert(data.error);
+                } else {
+                    document.getElementById("expression").value = data.result;
+                    updateHistory(expression, data.result);
+                }
+            })
+            .catch(error => console.error("Error:", error));
+        }
+
+        function updateHistory(expression, result) {
+            let historyDiv = document.getElementById("history");
+            let newEntry = document.createElement("p");
+            newEntry.textContent = `${expression} = ${result}`;
+            historyDiv.prepend(newEntry);
+        }
+    </script>
+</body>
+</html> {% endcomment %}
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculator</title>
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            text-align: center; 
+            background-color: #f4f4f4;
+        }
+        .calculator {
+            width: 300px;
+            margin: 50px auto;
+            padding: 20px;
+            background: white;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+        }
+        input { 
+            width: 90%;
+            height: 50px; 
+            font-size: 20px; 
+            text-align: right;
+            margin-bottom: 10px;
+            padding: 5px;
+            border: 2px solid #ccc;
+            border-radius: 5px;
+        }
+        .buttons {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+        }
+        button {
+            height: 50px;
+            font-size: 18px;
+            background: #3498db;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background: #2980b9;
+        }
+        .history, .result {
+            text-align: left;
+            margin-top: 20px;
+            padding: 10px;
+            border-top: 2px solid #ccc;
+        }
+        .result {
+            font-size: 20px;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+    </style>
+</head>
+<body>
+    <div class="calculator">
+        <h2>Simple Calculator</h2>
+        <input type="text" id="expression" readonly>
+        <h3 class="result">Result: <span id="result"></span></h3>
+        <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
+
+        <div class="buttons">
+            <button onclick="appendValue('1')">1</button>
+            <button onclick="appendValue('2')">2</button>
+            <button onclick="appendValue('3')">3</button>
+            <button onclick="appendValue('+')">+</button>
+
+            <button onclick="appendValue('4')">4</button>
+            <button onclick="appendValue('5')">5</button>
+            <button onclick="appendValue('6')">6</button>
+            <button onclick="appendValue('-')">-</button>
+
+            <button onclick="appendValue('7')">7</button>
+            <button onclick="appendValue('8')">8</button>
+            <button onclick="appendValue('9')">9</button>
+            <button onclick="appendValue('*')">*</button>
+
+            <button onclick="appendValue('0')">0</button>
+            <button onclick="clearInput()">C</button>
+            <button onclick="calculate()">=</button>
+            <button onclick="appendValue('/')">/</button>
+        </div>
+
+        <div class="history">
+            <h3>Calculation History</h3>
+            <div id="history">
+                {% for calc in history %}
+                    <p>{{ calc.expression }} = {{ calc.result }}</p>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function appendValue(value) {
+            document.getElementById("expression").value += value;
+        }
+
+        function clearInput() {
+            document.getElementById("expression").value = "";
+            document.getElementById("result").textContent = ""; // Clear result
+        }
+        function getCSRFToken() {
+            return document.querySelector("[name=csrfmiddlewaretoken]").value;
+        }
+        function calculate() {
+            let expression = document.getElementById("expression").value;
+
+            if (!expression) {
+                alert("Enter an expression first!");
+                return;
+            }
+
+            fetch("/calculate/", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" ,
+                "X-CSRFToken": getCSRFToken()},
+                body: JSON.stringify({ expression: expression }),
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    alert(data.error);
+                } else {
+                    document.getElementById("result").textContent = data.result; // Show result separately
+                    updateHistory(expression, data.result);
+                }
+            })
+            .catch(error => console.error("Error:", error));
+        }
+
+        function updateHistory(expression, result) {
+            let historyDiv = document.getElementById("history");
+            let newEntry = document.createElement("p");
+            newEntry.textContent = `${expression} = ${result}`;
+            historyDiv.prepend(newEntry);
+        }
+    </script>
+</body>
+</html>
